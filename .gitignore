@@ -1,0 +1,36 @@
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Python Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Secrets & Environment Variables (ห้าม push เด็ดขาด)
+.env
+.env.local
+.env.*.local
+
+# Test & Coverage Cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node.js / TypeScript Legacy Files (ไม่เอาเข้า Git)
+node_modules/
+dist/
+src/
+prisma/
+package.json
+package-lock.json
+tsconfig.json
+jest.config.js
+
+# OS & IDE Files
+.DS_Store
+.vscode/
+.idea/
