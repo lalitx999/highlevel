@@ -1,0 +1,17 @@
+PORT=3000
+NODE_ENV=production
+BASE_URL=https://app9.tanchonhomserverxxx.online
+
+# HighLevel App Credentials
+GHL_CLIENT_ID=6a83dd417f26e7f7f476cbbb-mtb4c6z6
+GHL_CLIENT_SECRET=517764c0-ebe2-468b-a878-6efd3f495d7a
+GHL_SCOPES=contacts.readonly contacts.write conversations.readonly conversations.write conversations/message.readonly conversations/message.write
+GHL_REDIRECT_URI=https://app9.tanchonhomserverxxx.online/api/oauth/callback
+
+# LINE OA Credentials
+LINE_CHANNEL_ID=2011154533
+LINE_CHANNEL_SECRET=5cee84abef0225fd377f570eb9c05f13
+LINE_CHANNEL_ACCESS_TOKEN="AQiShqYWkCs2AYSDM5c/SOsnLW3F73WSy2IUhhCFFt4NYcpAEbl1pu+7QXAwfJSzRoTeSrR4xpPJLaX5PC3rZeG7F+9W7I1nKE8Oz6vLU4GT0G37LZGJvHOiblhwxs69f5B6egPvygZjZgf2YVwmLwdB04t89/1O/w1cDnyilFU="
+
+# Database Configuration (PostgreSQL)
+DATABASE_URL=postgresql://postgres:661201123_Asd@postgres_server:5432/postgres?schema=public
