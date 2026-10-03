@@ -44,6 +44,7 @@ class GHLInboundMessagePayload(BaseModel):
     contactId: str
     message: str
     conversationId: Optional[str] = None
+    conversationProviderId: Optional[str] = None
 
 
 class GHLLocationObj(BaseModel):

@@ -4,6 +4,7 @@ from typing import Optional
 from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Query, Request, status
 from fastapi.responses import JSONResponse
 from sqlalchemy import desc, select
+from app.core.config import settings
 from app.core.database import AsyncSessionLocal
 from app.core.logging import get_trace_id, logger, set_trace_id
 from app.core.security import verify_line_signature
@@ -150,12 +151,14 @@ async def process_line_inbound_events(
                     )
 
             # 3. Inject inbound message into HighLevel Conversations API
+            provider_id = settings.GHL_CONVERSATION_PROVIDER_ID or None
             await ghl_api_service.inject_inbound_message(
                 location_id,
                 GHLInboundMessagePayload(
                     type="SMS",
                     contactId=hl_contact_id,
                     message=message_text,
+                    conversationProviderId=provider_id,
                 ),
             )
 
@@ -220,6 +223,7 @@ async def handle_line_webhook(
 
 
 @router.get("/highlevel/outbound", summary="HighLevel Outbound Webhook Health/Info")
+@router.get("/highlevel/provider-outbound", summary="HighLevel Provider Outbound Webhook Health/Info")
 async def ghl_outbound_webhook_info():
     return {
         "status": "active",
@@ -229,6 +233,7 @@ async def ghl_outbound_webhook_info():
 
 
 @router.post("/highlevel/outbound", response_model=OutboundWebhookResult, summary="HighLevel Outbound Webhook")
+@router.post("/highlevel/provider-outbound", response_model=OutboundWebhookResult, summary="HighLevel Provider Outbound Webhook")
 async def handle_ghl_outbound_webhook(payload: GHLOutboundWebhookPayload):
     """
     Receives outbound message events from HighLevel CRM when an agent sends a message.

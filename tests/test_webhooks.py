@@ -64,3 +64,23 @@ async def test_ghl_outbound_echo_suppression():
         assert response.status_code == 200
         assert response.json()["status"] == "ignored"
         assert response.json()["reason"] == "inbound_echo_suppressed"
+
+        # Test provider-outbound route echo suppression
+        response_provider = await ac.post("/api/webhooks/highlevel/provider-outbound", json=payload)
+        assert response_provider.status_code == 200
+        assert response_provider.json()["status"] == "ignored"
+        assert response_provider.json()["reason"] == "inbound_echo_suppressed"
+
+
+@pytest.mark.asyncio
+async def test_ghl_inbound_message_payload_provider_id():
+    from app.schemas.highlevel import GHLInboundMessagePayload
+    payload = GHLInboundMessagePayload(
+        type="SMS",
+        contactId="cnt_123",
+        message="Hello",
+        conversationProviderId=settings.GHL_CONVERSATION_PROVIDER_ID,
+    )
+    payload_dict = payload.model_dump(exclude_none=True)
+    assert payload_dict["conversationProviderId"] == "6ac0bbc0e2328b5346d36789"
+

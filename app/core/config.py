@@ -35,6 +35,10 @@ class Settings(BaseSettings):
         default="https://services.leadconnectorhq.com",
         description="HighLevel API Base URL",
     )
+    GHL_CONVERSATION_PROVIDER_ID: str = Field(
+        default="6ac0bbc0e2328b5346d36789",
+        description="HighLevel Conversation Provider ID",
+    )
 
     # LINE OA Credentials
     LINE_CHANNEL_ID: str = Field(default="", description="LINE Channel ID")
