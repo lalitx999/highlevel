@@ -77,10 +77,10 @@ class GHLTokenManager:
         )
         return token_record
 
-    async def get_valid_access_token(self, location_id: str) -> str:
+    async def get_valid_access_token(self, location_id: str, force_refresh: bool = False) -> str:
         """
         Returns a valid Access Token for the location_id.
-        If token is within 5 minutes of expiration, it automatically refreshes safely using an asyncio.Lock.
+        If token is within 5 minutes of expiration (or force_refresh is True), it automatically refreshes safely using an asyncio.Lock.
         """
         mutex = await self._get_mutex(location_id)
 
@@ -109,7 +109,7 @@ class GHLTokenManager:
 
             is_expiring_soon = (expires_at - now) < buffer_delta
 
-            if not is_expiring_soon:
+            if not is_expiring_soon and not force_refresh:
                 return token_record.access_token
 
             # 3. Token is expiring soon: Perform OAuth refresh

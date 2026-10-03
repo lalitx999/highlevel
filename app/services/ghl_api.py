@@ -15,8 +15,8 @@ class GHLApiService:
     def __init__(self) -> None:
         self.base_url = settings.GHL_BASE_URL
 
-    async def _get_headers(self, location_id: str) -> Dict[str, str]:
-        access_token = await ghl_token_manager.get_valid_access_token(location_id)
+    async def _get_headers(self, location_id: str, force_refresh: bool = False) -> Dict[str, str]:
+        access_token = await ghl_token_manager.get_valid_access_token(location_id, force_refresh=force_refresh)
         return {
             "Authorization": f"Bearer {access_token}",
             "Version": "2021-07-28",
@@ -97,9 +97,9 @@ class GHLApiService:
         payload: GHLInboundMessagePayload,
     ) -> Any:
         """Inject an Inbound message into HighLevel Conversation API v2."""
-        try:
-            headers = await self._get_headers(location_id)
-            async with httpx.AsyncClient(timeout=10.0) as client:
+        headers = await self._get_headers(location_id)
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            try:
                 response = await client.post(
                     f"{self.base_url}/conversations/messages/inbound",
                     headers=headers,
@@ -107,15 +107,47 @@ class GHLApiService:
                 )
                 response.raise_for_status()
                 return response.json()
-        except Exception as exc:
-            logger.error(
-                f"Failed to inject inbound message to HighLevel: {exc}",
-                error_code="GHL_INBOUND_MSG_FAILED",
-                locationId=location_id,
-                contactId=payload.contactId,
-                exc_info=True,
-            )
-            raise RuntimeError(f"Failed to inject inbound message into HighLevel: {exc}")
+            except httpx.HTTPStatusError as http_err:
+                if http_err.response.status_code == 401:
+                    logger.warn(
+                        "Received 401 Unauthorized from GHL Inbound API. Attempting force token refresh...",
+                        locationId=location_id,
+                    )
+                    try:
+                        headers = await self._get_headers(location_id, force_refresh=True)
+                        retry_resp = await client.post(
+                            f"{self.base_url}/conversations/messages/inbound",
+                            headers=headers,
+                            json=payload.model_dump(exclude_none=True),
+                        )
+                        retry_resp.raise_for_status()
+                        return retry_resp.json()
+                    except Exception as retry_exc:
+                        logger.error(
+                            f"Retry after token refresh failed: {retry_exc}",
+                            error_code="GHL_INBOUND_MSG_RETRY_FAILED",
+                            locationId=location_id,
+                            contactId=payload.contactId,
+                            exc_info=True,
+                        )
+                        raise RuntimeError(f"Failed to inject inbound message into HighLevel (401 Unauthorized): {retry_exc}")
+                logger.error(
+                    f"Failed to inject inbound message to HighLevel: {http_err}",
+                    error_code="GHL_INBOUND_MSG_FAILED",
+                    locationId=location_id,
+                    contactId=payload.contactId,
+                    exc_info=True,
+                )
+                raise RuntimeError(f"Failed to inject inbound message into HighLevel: {http_err}")
+            except Exception as exc:
+                logger.error(
+                    f"Failed to inject inbound message to HighLevel: {exc}",
+                    error_code="GHL_INBOUND_MSG_FAILED",
+                    locationId=location_id,
+                    contactId=payload.contactId,
+                    exc_info=True,
+                )
+                raise RuntimeError(f"Failed to inject inbound message into HighLevel: {exc}")
 
 
 ghl_api_service = GHLApiService()
