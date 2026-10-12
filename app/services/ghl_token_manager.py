@@ -137,10 +137,14 @@ class GHLTokenManager:
                 await self.save_tokens(token_response, location_id)
                 return token_response.access_token
             except Exception as exc:
+                ghl_error_body = None
+                if isinstance(exc, httpx.HTTPStatusError):
+                    ghl_error_body = exc.response.text[:500]
                 logger.error(
                     f"Failed to refresh HighLevel OAuth token for locationId {location_id}: {exc}",
                     error_code="GHL_TOKEN_REFRESH_FAILED",
                     locationId=location_id,
+                    ghlResponse=ghl_error_body,
                     exc_info=True,
                 )
                 raise RuntimeError(

@@ -112,6 +112,7 @@ class GHLApiService:
                     logger.warn(
                         "Received 401 Unauthorized from GHL Inbound API. Attempting force token refresh...",
                         locationId=location_id,
+                        ghlResponse=http_err.response.text[:500],
                     )
                     try:
                         headers = await self._get_headers(location_id, force_refresh=True)
