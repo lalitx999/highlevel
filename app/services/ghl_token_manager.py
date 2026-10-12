@@ -114,7 +114,8 @@ class GHLTokenManager:
 
             # 3. Token is expiring soon: Perform OAuth refresh
             logger.info(
-                "HighLevel access token expiring soon, initiating refresh...",
+                "Forcing HighLevel access token refresh..." if force_refresh and not is_expiring_soon
+                else "HighLevel access token expiring soon, initiating refresh...",
                 locationId=location_id,
             )
 

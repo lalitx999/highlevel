@@ -109,10 +109,33 @@ class GHLApiService:
                 return response.json()
             except httpx.HTTPStatusError as http_err:
                 if http_err.response.status_code == 401:
+                    ghl_body = http_err.response.text[:500]
+                    canonical_code = ""
+                    try:
+                        canonical_code = http_err.response.json().get("canonicalCode") or ""
+                    except Exception:
+                        pass
+
+                    # Provider permission error: the token is valid, refreshing won't help.
+                    if "PROVIDER" in canonical_code.upper():
+                        logger.error(
+                            "GHL rejected conversationProviderId: this OAuth app/token has no access to the provider. "
+                            "Check that the provider belongs to the same Marketplace app as GHL_CLIENT_ID and that "
+                            "the app is (re)installed on this location.",
+                            error_code="GHL_PROVIDER_NO_ACCESS",
+                            locationId=location_id,
+                            contactId=payload.contactId,
+                            conversationProviderId=payload.conversationProviderId,
+                            ghlResponse=ghl_body,
+                        )
+                        raise RuntimeError(
+                            f"HighLevel denied access to conversationProviderId {payload.conversationProviderId}"
+                        )
+
                     logger.warn(
                         "Received 401 Unauthorized from GHL Inbound API. Attempting force token refresh...",
                         locationId=location_id,
-                        ghlResponse=http_err.response.text[:500],
+                        ghlResponse=ghl_body,
                     )
                     try:
                         headers = await self._get_headers(location_id, force_refresh=True)
