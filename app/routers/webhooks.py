@@ -261,6 +261,11 @@ async def handle_ghl_outbound_webhook(payload: GHLOutboundWebhookPayload):
         )
         return OutboundWebhookResult(status="ignored", reason="inbound_echo_suppressed")
 
+    # Ignore app lifecycle events like INSTALL / UNINSTALL
+    if type_str in ("install", "uninstall"):
+        logger.info("Ignoring GHL app lifecycle webhook event", event_type=type_str, locationId=payload.locationId)
+        return OutboundWebhookResult(status="ignored", reason=f"{type_str}_event_ignored")
+
     # If direction is explicitly set and not outbound/sms, ignore
     if direction_str and direction_str not in ("outbound", "sms"):
         logger.info("Ignoring non-outbound GHL webhook event", direction=direction_str)

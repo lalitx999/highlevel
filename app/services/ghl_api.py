@@ -160,9 +160,11 @@ class GHLApiService:
                     error_code="GHL_INBOUND_MSG_FAILED",
                     locationId=location_id,
                     contactId=payload.contactId,
+                    ghlResponse=http_err.response.text[:1000],
+                    payload=payload.model_dump(exclude_none=True),
                     exc_info=True,
                 )
-                raise RuntimeError(f"Failed to inject inbound message into HighLevel: {http_err}")
+                raise RuntimeError(f"Failed to inject inbound message into HighLevel: {http_err} | GHL Response: {http_err.response.text[:1000]}")
             except Exception as exc:
                 logger.error(
                     f"Failed to inject inbound message to HighLevel: {exc}",
