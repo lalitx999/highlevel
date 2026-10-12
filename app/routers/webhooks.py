@@ -152,10 +152,11 @@ async def process_line_inbound_events(
 
             # 3. Inject inbound message into HighLevel Conversations API
             provider_id = settings.GHL_CONVERSATION_PROVIDER_ID or None
+            msg_type = settings.GHL_CONVERSATION_TYPE or ("Custom" if provider_id else "SMS")
             await ghl_api_service.inject_inbound_message(
                 location_id,
                 GHLInboundMessagePayload(
-                    type="SMS",
+                    type=msg_type,
                     contactId=hl_contact_id,
                     message=message_text,
                     conversationProviderId=provider_id,

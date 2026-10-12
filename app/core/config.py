@@ -39,6 +39,10 @@ class Settings(BaseSettings):
         default="6ac0bbc0e2328b5346d36789",
         description="HighLevel Conversation Provider ID",
     )
+    GHL_CONVERSATION_TYPE: str = Field(
+        default="Custom",
+        description="HighLevel Conversation Inbound Message Type (e.g. Custom, SMS, Live_Chat)",
+    )
 
     # LINE OA Credentials
     LINE_CHANNEL_ID: str = Field(default="", description="LINE Channel ID")

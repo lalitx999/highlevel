@@ -40,7 +40,7 @@ class GHLContactsSearchResponse(BaseModel):
 
 
 class GHLInboundMessagePayload(BaseModel):
-    type: str = "SMS"
+    type: str = "Custom"
     contactId: str
     message: str
     conversationId: Optional[str] = None

@@ -76,7 +76,7 @@ async def test_ghl_outbound_echo_suppression():
 async def test_ghl_inbound_message_payload_provider_id():
     from app.schemas.highlevel import GHLInboundMessagePayload
     payload = GHLInboundMessagePayload(
-        type="SMS",
+        type="Custom",
         contactId="cnt_123",
         message="Hello",
         conversationProviderId=settings.GHL_CONVERSATION_PROVIDER_ID,
